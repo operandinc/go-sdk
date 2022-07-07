@@ -1,6 +1,6 @@
 # Operand Go SDK
 
-The official Go SDK for the [Operand](https://operand.ai) API. You can get your free API key by logging into the dashboard on our website, and navigating to Settings -> API Keys. If you have any questions, comments or feedback, please [reach out](mailto:morgan@operand.ai) (we usually don't bite)!
+The official Go SDK for the [Operand](https://operand.ai) API. You can get your free API key by logging into the dashboard on our website, and navigating to Settings -> API Keys. If you have any questions, comments or feedback, please [reach out](mailto:support@operand.ai) (we usually don't bite)!
 
 ### Installation
 

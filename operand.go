@@ -309,7 +309,10 @@ type ListObjectsResponse struct {
 }
 
 // ListObjects lists objects in the Operand API.
-func (c *Client) ListObjects(ctx context.Context, args ListObjectsArgs) (*ListObjectsResponse, error) {
+func (c *Client) ListObjects(
+	ctx context.Context,
+	args ListObjectsArgs,
+) (*ListObjectsResponse, error) {
 	resp := new(ListObjectsResponse)
 	if err := c.doRequest(ctx, "GET", "/v3/objects", args, resp); err != nil {
 		return nil, err
@@ -324,7 +327,11 @@ type GetObjectExtraArgs struct {
 }
 
 // GetObject returns a singular object from the Operand API.
-func (c *Client) GetObject(ctx context.Context, id string, extra *GetObjectExtraArgs) (*Object, error) {
+func (c *Client) GetObject(
+	ctx context.Context,
+	id string,
+	extra *GetObjectExtraArgs,
+) (*Object, error) {
 	obj := new(Object)
 
 	params := url.Values{}
@@ -356,7 +363,11 @@ type UpdateObjectArgs struct {
 }
 
 // UpdateObject updates an existing object in the Operand API.
-func (c *Client) UpdateObject(ctx context.Context, id string, args UpdateObjectArgs) (*Object, error) {
+func (c *Client) UpdateObject(
+	ctx context.Context,
+	id string,
+	args UpdateObjectArgs,
+) (*Object, error) {
 	obj := new(Object)
 	if err := c.doRequest(ctx, "PUT", "/v3/objects/"+id, args, obj); err != nil {
 		return nil, err
@@ -375,7 +386,11 @@ type DeleteObjectExtraArgs struct {
 }
 
 // DeleteObject deletes an object from the Operand API.
-func (c *Client) DeleteObject(ctx context.Context, id string, extra *DeleteObjectExtraArgs) (*DeleteResponse, error) {
+func (c *Client) DeleteObject(
+	ctx context.Context,
+	id string,
+	extra *DeleteObjectExtraArgs,
+) (*DeleteResponse, error) {
 	resp := new(DeleteResponse)
 	if err := c.doRequest(ctx, "DELETE", "/v3/objects/"+id, nil, resp); err != nil {
 		return nil, err
@@ -383,10 +398,24 @@ func (c *Client) DeleteObject(ctx context.Context, id string, extra *DeleteObjec
 	return resp, nil
 }
 
+// ContentType is an enumeration over the various content types.
+type ContentType string
+
+// Supported content types.
+const (
+	ContentTypeTitle    ContentType = "title"
+	ContentTypeContent  ContentType = "content"
+	ContentTypeLink     ContentType = "link"
+	ContentTypeImage    ContentType = "image"
+	ContentTypeCode     ContentType = "code"
+	ContentTypeListItem ContentType = "list_item"
+)
+
 // Content is an individual piece of content.
 type Content struct {
-	ObjectID string `json:"objectId"`
-	Content  string `json:"content"`
+	ObjectID string      `json:"objectId"`
+	Content  string      `json:"content"`
+	Type     ContentType `json:"type"`
 }
 
 // SearchContentsArgs contains the arguments for the SearchContents function.
@@ -406,7 +435,10 @@ type SearchContentsResponse struct {
 }
 
 // SearchContents searches for content in the Operand API.
-func (c *Client) SearchContents(ctx context.Context, args SearchContentsArgs) (*SearchContentsResponse, error) {
+func (c *Client) SearchContents(
+	ctx context.Context,
+	args SearchContentsArgs,
+) (*SearchContentsResponse, error) {
 	resp := new(SearchContentsResponse)
 	if err := c.doRequest(ctx, "POST", "/v3/search/contents", args, resp); err != nil {
 		return nil, err
@@ -430,7 +462,10 @@ type SearchRelatedResponse struct {
 }
 
 // SearchRelated searches for related objects in the Operand API.
-func (c *Client) SearchRelated(ctx context.Context, args SearchRelatedArgs) (*SearchRelatedResponse, error) {
+func (c *Client) SearchRelated(
+	ctx context.Context,
+	args SearchRelatedArgs,
+) (*SearchRelatedResponse, error) {
 	resp := new(SearchRelatedResponse)
 	if err := c.doRequest(ctx, "POST", "/v3/search/related", args, resp); err != nil {
 		return nil, err
@@ -454,7 +489,10 @@ type CompletionAnswerResponse struct {
 }
 
 // CompletionAnswer searches for answers in the Operand API.
-func (c *Client) CompletionAnswer(ctx context.Context, args CompletionAnswerArgs) (*CompletionAnswerResponse, error) {
+func (c *Client) CompletionAnswer(
+	ctx context.Context,
+	args CompletionAnswerArgs,
+) (*CompletionAnswerResponse, error) {
 	resp := new(CompletionAnswerResponse)
 	if err := c.doRequest(ctx, "POST", "/v3/completion/answer", args, resp); err != nil {
 		return nil, err
@@ -479,7 +517,10 @@ type CompletionTypeAheadResponse struct {
 }
 
 // CompletionTypeAhead completes a text string using data from the Operand API.
-func (c *Client) CompletionTypeAhead(ctx context.Context, args CompletionTypeAheadArgs) (*CompletionTypeAheadResponse, error) {
+func (c *Client) CompletionTypeAhead(
+	ctx context.Context,
+	args CompletionTypeAheadArgs,
+) (*CompletionTypeAheadResponse, error) {
 	resp := new(CompletionTypeAheadResponse)
 	if err := c.doRequest(ctx, "POST", "/v3/completion/typeahead", args, resp); err != nil {
 		return nil, err

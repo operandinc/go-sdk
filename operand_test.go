@@ -33,7 +33,10 @@ func TestOperand(t *testing.T) {
 
 	// Make sure the collection indexed properly.
 	if collection.IndexingStatus != IndexingStatusReady {
-		t.Fatalf("expected collection indexing status to be ready, got %s", collection.IndexingStatus)
+		t.Fatalf(
+			"expected collection indexing status to be ready, got %s",
+			collection.IndexingStatus,
+		)
 	}
 
 	// Index a few text documents.
