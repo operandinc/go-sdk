@@ -239,16 +239,26 @@ func (o *Object) Wait(ctx context.Context, client *Client) error {
 
 	// Periodically poll the object until it's ready.
 	for o.IndexingStatus == IndexingStatusIndexing {
-		// Sleep for a variable amount of time, depending on the iteration count.
+		// We sleep for progressively longer periods of time.
+		var sleepDuration time.Duration
 		if iterations == 0 {
 			// If this is the first iteration, don't sleep.
 		} else if iterations < 10 {
 			// Sleep for a small amount of time for the first 10 iterations.
-			time.Sleep(time.Millisecond * 300)
+			sleepDuration = time.Millisecond * 300
 		} else {
 			// For remaining iterations, sleep for a longer amount of time.
 			// This is likely a larger object.
-			time.Sleep(time.Second)
+			sleepDuration = time.Second
+		}
+
+		// Sleep for the duration.
+		if sleepDuration > 0 {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(sleepDuration):
+			}
 		}
 
 		// Re-fetch the object.
