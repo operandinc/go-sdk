@@ -31,6 +31,11 @@ func TestOperand(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Make sure the collection indexed properly.
+	if collection.IndexingStatus != IndexingStatusReady {
+		t.Fatalf("expected collection indexing status to be ready, got %s", collection.IndexingStatus)
+	}
+
 	// Index a few text documents.
 	documents := []string{
 		"Operand makes knowledge come alive.",
@@ -51,6 +56,12 @@ func TestOperand(t *testing.T) {
 		} else if err := obj.Wait(ctx, client); err != nil {
 			t.Fatal(err)
 		}
+
+		// Make sure the object indexed properly.
+		if obj.IndexingStatus != IndexingStatusReady {
+			t.Fatalf("expected object indexing status to be ready, got %s", obj.IndexingStatus)
+		}
+
 		objects = append(objects, obj)
 	}
 

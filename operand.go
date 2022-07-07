@@ -266,7 +266,7 @@ func (o *Object) Wait(ctx context.Context, client *Client) error {
 		if err != nil {
 			return err
 		}
-		o = obj
+		*o = *obj
 
 		// Increment the number of iterations.
 		iterations++
