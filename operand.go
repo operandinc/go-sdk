@@ -267,6 +267,9 @@ func (o *Object) Wait(ctx context.Context, client *Client) error {
 			return err
 		}
 		o = obj
+
+		// Increment the number of iterations.
+		iterations++
 	}
 
 	// At this point, the indexing status has been updated and we can return.
