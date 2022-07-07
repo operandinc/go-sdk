@@ -54,7 +54,7 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body, dst a
 	if body != nil {
 		marshalled, err := json.Marshal(body)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		reqBody = bytes.NewBuffer(marshalled)
 	}
@@ -103,7 +103,7 @@ const (
 	ObjectTypeCollection       ObjectType = "collection"
 	ObjectTypeText             ObjectType = "text"
 	ObjectTypeHTML             ObjectType = "html"
-	ObjectTupeMarkdown         ObjectType = "markdown"
+	ObjectTypeMarkdown         ObjectType = "markdown"
 	ObjectTypePDF              ObjectType = "pdf"
 	ObjectTypeImage            ObjectType = "image"
 	ObjectTypeGitHubRepository ObjectType = "github_repository"
@@ -220,6 +220,49 @@ func (o *Object) UnmarshalMetadata() (any, error) {
 	return rval, nil
 }
 
+// Wait waits for an object to be indexed before returning. A context can
+// (and should) be passed into this function with a timeout to ensure that
+// this doesn't block indefinitely.
+func (o *Object) Wait(ctx context.Context, client *Client) error {
+	// If we're already ready, we're done and we don't need to wait for anything.
+	if o.IndexingStatus != IndexingStatusIndexing {
+		return nil
+	}
+
+	// If the context is already cancelled for some reason, return early.
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
+	// Keep track of the number of iterations.
+	var iterations int
+
+	// Periodically poll the object until it's ready.
+	for o.IndexingStatus == IndexingStatusIndexing {
+		// Sleep for a variable amount of time, depending on the iteration count.
+		if iterations == 0 {
+			// If this is the first iteration, don't sleep.
+		} else if iterations < 10 {
+			// Sleep for a small amount of time for the first 10 iterations.
+			time.Sleep(time.Millisecond * 300)
+		} else {
+			// For remaining iterations, sleep for a longer amount of time.
+			// This is likely a larger object.
+			time.Sleep(time.Second)
+		}
+
+		// Re-fetch the object.
+		obj, err := client.GetObject(ctx, o.ID, nil)
+		if err != nil {
+			return err
+		}
+		o = obj
+	}
+
+	// At this point, the indexing status has been updated and we can return.
+	return nil
+}
+
 // CreateObjectArgs contains the arguments for the CreateObject function.
 type CreateObjectArgs struct {
 	ParentID   *string        `json:"parentId,omitempty"`
@@ -253,7 +296,7 @@ type ListObjectsResponse struct {
 }
 
 // ListObjects lists objects in the Operand API.
-func ListObjects(ctx context.Context, args ListObjectsArgs) (*ListObjectsResponse, error) {
+func (c *Client) ListObjects(ctx context.Context, args ListObjectsArgs) (*ListObjectsResponse, error) {
 	resp := new(ListObjectsResponse)
 	if err := c.doRequest(ctx, "GET", "/v3/objects", args, resp); err != nil {
 		return nil, err
@@ -268,7 +311,7 @@ type GetObjectExtraArgs struct {
 }
 
 // GetObject returns a singular object from the Operand API.
-func GetObject(ctx context.Context, id string, extra *GetObjectExtraArgs) (*Object, error) {
+func (c *Client) GetObject(ctx context.Context, id string, extra *GetObjectExtraArgs) (*Object, error) {
 	obj := new(Object)
 
 	params := url.Values{}
