@@ -108,6 +108,7 @@ const (
 	ObjectTypeImage            ObjectType = "image"
 	ObjectTypeGitHubRepository ObjectType = "github_repository"
 	ObjectTypeEPUB             ObjectType = "epub"
+	ObjectTypeAudio            ObjectType = "audio"
 )
 
 // Metadata defintitions for objects (dependent on type).
@@ -156,6 +157,12 @@ type (
 		URL      string  `json:"epubUrl"`
 		Title    *string `json:"title"`
 		Language *string `json:"language"`
+	}
+
+	// AudioMetadata is the metadata for an audio object.
+	AudioMetadata struct {
+		URL    string  `json:"audioUrl"`
+		GCSUri *string `json:"gcsUri"`
 	}
 )
 
