@@ -109,6 +109,7 @@ const (
 	ObjectTypeGitHubRepository ObjectType = "github_repository"
 	ObjectTypeEPUB             ObjectType = "epub"
 	ObjectTypeAudio            ObjectType = "audio"
+	ObjectTypeRSS              ObjectType = "rss"
 )
 
 // Metadata defintitions for objects (dependent on type).
@@ -164,6 +165,10 @@ type (
 		URL    string  `json:"audioUrl"`
 		GCSUri *string `json:"gcsUri"`
 	}
+	// RSSMetadata is the metadata for an RSS object.
+	RSSMetadata struct {
+		URL string `json:"rssUrl"`
+	}
 )
 
 // IndexingStatus is an enumeration over the different states an object can be in.
@@ -216,6 +221,10 @@ func (o *Object) UnmarshalMetadata() (any, error) {
 		rval = new(GitHubRepositoryMetadata)
 	case ObjectTypeEPUB:
 		rval = new(EPUBMetadata)
+	case ObjectTypeAudio:
+		rval = new(AudioMetadata)
+	case ObjectTypeRSS:
+		rval = new(RSSMetadata)
 	default:
 		return nil, fmt.Errorf("unsupported object type: %s", o.Type)
 	}
