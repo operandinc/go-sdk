@@ -110,6 +110,7 @@ const (
 	ObjectTypeEPUB             ObjectType = "epub"
 	ObjectTypeAudio            ObjectType = "audio"
 	ObjectTypeRSS              ObjectType = "rss"
+	ObjectTypeNotion           ObjectType = "notion"
 )
 
 // Metadata defintitions for objects (dependent on type).
@@ -169,6 +170,10 @@ type (
 	RSSMetadata struct {
 		URL string `json:"rssUrl"`
 	}
+	// NotionMetadata is the metadata for a Notion object.
+	NotionMetadata struct {
+		AccessToken string `json:"accessToken"`
+	}
 )
 
 // IndexingStatus is an enumeration over the different states an object can be in.
@@ -225,6 +230,8 @@ func (o *Object) UnmarshalMetadata() (any, error) {
 		rval = new(AudioMetadata)
 	case ObjectTypeRSS:
 		rval = new(RSSMetadata)
+	case ObjectTypeNotion:
+		rval = new(NotionMetadata)
 	default:
 		return nil, fmt.Errorf("unsupported object type: %s", o.Type)
 	}
