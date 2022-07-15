@@ -112,6 +112,7 @@ const (
 	ObjectTypeRSS              ObjectType = "rss"
 	ObjectTypeNotion           ObjectType = "notion"
 	ObjectTypeMbox             ObjectType = "mbox"
+	ObjectEmail                ObjectType = "email"
 )
 
 // Metadata defintitions for objects (dependent on type).
@@ -179,6 +180,14 @@ type (
 	MboxMetadata struct {
 		URL string `json:"mboxUrl"`
 	}
+	// EmailMetadata is the metadata for an Email object.
+	EmailMetadata struct {
+		Email   string     `json:"email"`
+		Sent    *time.Time `json:"sent"`
+		From    *string    `json:"from"`
+		Subject *string    `json:"subject"`
+		To      []string   `json:"to"`
+	}
 )
 
 // IndexingStatus is an enumeration over the different states an object can be in.
@@ -239,6 +248,8 @@ func (o *Object) UnmarshalMetadata() (any, error) {
 		rval = new(NotionMetadata)
 	case ObjectTypeMbox:
 		rval = new(MboxMetadata)
+	case ObjectEmail:
+		rval = new(EmailMetadata)
 	default:
 		return nil, fmt.Errorf("unsupported object type: %s", o.Type)
 	}
