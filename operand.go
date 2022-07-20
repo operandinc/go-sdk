@@ -113,6 +113,7 @@ const (
 	ObjectTypeNotion           ObjectType = "notion"
 	ObjectTypeMbox             ObjectType = "mbox"
 	ObjectEmail                ObjectType = "email"
+	ObjectTypeNotionPage       ObjectType = "notion_page"
 )
 
 // Metadata defintitions for objects (dependent on type).
@@ -188,6 +189,11 @@ type (
 		Subject *string    `json:"subject"`
 		To      []string   `json:"to"`
 	}
+	NotionPageMetadata struct {
+		PageID string  `json:"pageId"`
+		URL    string  `json:"url"`
+		Title  *string `json:"title"`
+	}
 )
 
 // IndexingStatus is an enumeration over the different states an object can be in.
@@ -250,6 +256,8 @@ func (o *Object) UnmarshalMetadata() (any, error) {
 		rval = new(MboxMetadata)
 	case ObjectEmail:
 		rval = new(EmailMetadata)
+	case ObjectTypeNotionPage:
+		rval = new(NotionPageMetadata)
 	default:
 		return nil, fmt.Errorf("unsupported object type: %s", o.Type)
 	}
