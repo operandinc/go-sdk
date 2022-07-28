@@ -487,6 +487,39 @@ func (c *Client) SearchContents(
 	return resp, nil
 }
 
+// SearchObjectsArgs contains the arguments for the SearchObjects function.
+type SearchObjectsArgs struct {
+	ParentIDs []string       `json:"parentIds,omitempty"` // Can be omitted, in which case all objects are searched.
+	Query     string         `json:"query"`               // Must not be empty.
+	Max       int            `json:"max,omitempty"`
+	Filter    map[string]any `json:"filter,omitempty"`
+}
+
+// SnippetObject is a snippet and an object.
+type SnippetObject struct {
+	Snippet string `json:"snippet"`
+	Object  Object `json:"object"`
+}
+
+// SearchObjectsResponse contains the response from the SearchObjects function.
+type SearchObjectsResponse struct {
+	ID        string          `json:"id"`
+	LatencyMS int64           `json:"latencyMs"`
+	Results   []SnippetObject `json:"results"`
+}
+
+// SearchObjects searches for objects in the Operand API.
+func (c *Client) SearchObjects(
+	ctx context.Context,
+	args SearchObjectsArgs,
+) (*SearchObjectsResponse, error) {
+	resp := new(SearchObjectsResponse)
+	if err := c.doRequest(ctx, "POST", "/v3/search/objects", args, resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 // SearchRelatedArgs contains the arguments for the SearchRelated function.
 type SearchRelatedArgs struct {
 	ParentIDs []string       `json:"parentIds,omitempty"` // Can be omitted, in which case all objects are searched.
