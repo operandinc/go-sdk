@@ -154,6 +154,7 @@ type (
 		RepoName    string  `json:"repoName"`
 		RootPath    *string `json:"rootPath"`
 		RootURL     *string `json:"rootUrl"`
+		Ref         *string `json:"ref"`
 	}
 
 	// EPUBMetadata is the metadata for an EPUB object.
