@@ -217,7 +217,7 @@ type Object struct {
 
 	// Optionally included in a GetObject response if the atom count is requested.
 	// Zero otherwise (in all other responses).
-	Atoms int `json:"atoms"`
+	Objects int `json:"objects"`
 }
 
 // UnmarshalMetadata unmarshals the metadata field of an object, depending
@@ -364,7 +364,7 @@ func (c *Client) ListObjects(
 
 // GetObjectExtraArgs contains the (optional) arguments for the GetObject function.
 type GetObjectExtraArgs struct {
-	// Optionally include the number of atoms underneath this object in the response.
+	// Optionally include the number of objects underneath this object in the response.
 	Count bool
 }
 
@@ -598,6 +598,123 @@ func (c *Client) CompletionTypeAhead(
 ) (*CompletionTypeAheadResponse, error) {
 	resp := new(CompletionTypeAheadResponse)
 	if err := c.doRequest(ctx, "POST", "/v3/completion/typeahead", args, resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// Trigger
+
+type CallbackKind string
+
+const (
+	CallbackKindWebhook CallbackKind = "webhook"
+)
+
+type (
+	WebhookCallbackMetadata struct {
+		URL string `json:"url"`
+	}
+)
+
+type Trigger struct {
+	ID                string          `json:"id"`
+	CreatedAt         time.Time       `json:"createdAt"`
+	Query             string          `json:"query"`
+	Filter            map[string]any  `json:"filter,omitempty"`
+	MatchingThreshold float32         `json:"matchingThreshold,omitempty"`
+	CallbackKind      CallbackKind    `json:"callbackKind"`
+	CallbackMetadata  json.RawMessage `json:"callbackMetadata"`
+
+	// Optional fields.
+	LastFired *time.Time `json:"lastFired,omitempty"`
+}
+
+func (t *Trigger) UnmarshalMetadata() (any, error) {
+	var rval any
+	switch t.CallbackKind {
+	case CallbackKindWebhook:
+		rval = new(WebhookCallbackMetadata)
+	default:
+		return nil, fmt.Errorf("unknown callback kind: %s", t.CallbackKind)
+	}
+
+	if err := json.Unmarshal(t.CallbackMetadata, rval); err != nil {
+		return nil, err
+	}
+
+	return rval, nil
+}
+
+type CreateTriggerArgs struct {
+	Query             string         `json:"query"`
+	Filter            map[string]any `json:"filter,omitempty"`
+	MatchingThreshold *float32       `json:"matchingThreshold,omitempty"`
+	CallbackKind      CallbackKind   `json:"callbackKind"`
+	CallbackMetadata  any            `json:"callbackMetadata"`
+}
+
+func (c *Client) CreateTrigger(
+	ctx context.Context,
+	args CreateTriggerArgs,
+) (*Trigger, error) {
+	trig := new(Trigger)
+	if err := c.doRequest(ctx, "POST", "/v3/triggers", args, trig); err != nil {
+		return nil, err
+	}
+	return trig, nil
+}
+
+type ListTriggersArgs struct {
+	Limit  int `json:"limit,omitempty"`
+	Offset int `json:"offset,omitempty"`
+}
+
+type ListTriggersResponse struct {
+	Triggers []Trigger `json:"triggers"`
+	HasMore  bool      `json:"hasMore"`
+}
+
+func (c *Client) ListTriggers(
+	ctx context.Context,
+	args ListTriggersArgs,
+) (*ListTriggersResponse, error) {
+	resp := new(ListTriggersResponse)
+	if err := c.doRequest(ctx, "GET", "/v3/triggers", args, resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+type GetTriggerArgs struct {
+	ID string `json:"id"`
+}
+
+func (c *Client) GetTrigger(
+	ctx context.Context,
+	args GetTriggerArgs,
+) (*Trigger, error) {
+	trig := new(Trigger)
+	if err := c.doRequest(ctx, "GET", "/v3/triggers/"+args.ID, nil, trig); err != nil {
+		return nil, err
+	}
+	return trig, nil
+}
+
+type DeleteTriggerArgs struct {
+	ID string `json:"id"`
+}
+
+type DeleteTriggerResponse struct {
+	Deleted bool `json:"deleted"`
+}
+
+func (c *Client) DeleteTrigger(
+	ctx context.Context,
+	args DeleteTriggerArgs,
+) (*DeleteTriggerResponse, error) {
+	resp := new(DeleteTriggerResponse)
+	if err := c.doRequest(ctx, "DELETE", "/v3/triggers/"+args.ID, nil, resp); err != nil {
 		return nil, err
 	}
 	return resp, nil
