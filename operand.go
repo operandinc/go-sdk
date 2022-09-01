@@ -36,10 +36,7 @@ func NewClient(apiKey string) *Client {
 // This is generally used with dedicated, or non-serverless deployments.
 func (c *Client) WithEndpoint(endpoint string) *Client {
 	// Ensure that the endpoint doesn't end with a trailing slash.
-	if strings.HasSuffix(endpoint, "/") {
-		endpoint = endpoint[:len(endpoint)-1]
-	}
-	c.endpoint = endpoint
+	c.endpoint = strings.TrimSuffix(endpoint, "/")
 	return c
 }
 
@@ -718,6 +715,18 @@ func (c *Client) DeleteTrigger(
 		return nil, err
 	}
 	return resp, nil
+}
+
+// FeedbackArgs contains the arguments for the Feedback function.
+type FeedbackArgs struct {
+	SearchID string `json:"searchId"`
+	ObjectID string `json:"objectId"`
+}
+
+// Feedback sends feedback to the Operand API.
+// This should be used when a user clicks on a result after an object-based search.
+func (c *Client) Feedback(ctx context.Context, args FeedbackArgs) error {
+	return c.doRequest(ctx, "POST", "/v3/feedback", args, nil)
 }
 
 /* Utility Functions */
