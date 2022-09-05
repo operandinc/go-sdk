@@ -545,10 +545,20 @@ func (c *Client) SearchRelated(
 	return resp, nil
 }
 
+// AnswerStyle is an enumeration over the various answer styles.
+type AnswerStyle string
+
+// Supported answer styles.
+const (
+	AnswerStyleDirect  ContentType = "direct"
+	AnswerStyleOperand ContentType = "operand"
+)
+
 // CompletionAnswerArgs contains the arguments for the CompletionAnswer function.
 type CompletionAnswerArgs struct {
 	ParentIDs []string       `json:"parentIds,omitempty"` // Can be omitted, in which case all objects are searched.
 	Question  string         `json:"question"`            // Must not be empty.
+	Style     AnswerStyle    `json:"style,omitempty"`
 	Filter    map[string]any `json:"filter,omitempty"`
 }
 
