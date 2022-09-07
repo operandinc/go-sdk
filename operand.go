@@ -124,8 +124,9 @@ type (
 
 	// HTMLMetadata is the metadata for an HTML object.
 	HTMLMetadata struct {
-		HTML  string  `json:"html"`
+		HTML  string  `json:"html,omitempty"`
 		Title *string `json:"title"`
+		URL   *string `json:"url"`
 	}
 
 	// MarkdownMetadata is the metadata for a markdown object.
