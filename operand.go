@@ -464,6 +464,7 @@ type Content struct {
 	ObjectID string      `json:"objectId"`
 	Content  string      `json:"content"`
 	Type     ContentType `json:"type"`
+	Score    float32     `json:"score"`
 }
 
 // SearchContentsArgs contains the arguments for the SearchContents function.
