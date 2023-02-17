@@ -1,0 +1,12 @@
+version: v1
+managed:
+  enabled: true
+  go_package_prefix:
+    default: github.com/operandinc/go-sdk
+plugins:
+  - plugin: go
+    out: .
+    opt: paths=source_relative
+  - plugin: connect-go
+    out: .
+    opt: paths=source_relative
