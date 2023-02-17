@@ -71,13 +71,6 @@ func (c *Client) CreateFile(
 ) (*filev1.CreateFileResponse, error) {
 	var buf bytes.Buffer
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.endpoint+"/upload", &buf)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Authorization", "Key "+c.apiKey)
-	req.Header.Set("Content-Type", "multipart/form-data")
-
 	mw := multipart.NewWriter(&buf)
 	mw.WriteField("name", name)
 	if parent != nil {
@@ -90,7 +83,6 @@ func (c *Client) CreateFile(
 		}
 		mw.WriteField("properties", string(marshaled))
 	}
-	// todo: could eventually stream this instead of buffering it all in memory.
 	if data != nil {
 		part, err := mw.CreateFormFile("file", name)
 		if err != nil {
@@ -101,10 +93,16 @@ func (c *Client) CreateFile(
 			return nil, err
 		}
 	}
-	err = mw.Close()
+	if err := mw.Close(); err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.endpoint+"/upload", &buf)
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("Authorization", "Key "+c.apiKey)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {

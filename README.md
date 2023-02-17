@@ -15,6 +15,7 @@ client := operand.NewClient(os.Getenv("OPERAND_API_KEY"))
 if _, err := client.CreateFile(
     context.Background(),
     "go.txt",
+    nil,
     bytes.NewReader([]byte("Hello, World!")),
     nil,
 ); err != nil {
