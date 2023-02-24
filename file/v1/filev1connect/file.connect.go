@@ -33,6 +33,9 @@ type FileServiceClient interface {
 	ListFiles(context.Context, *connect_go.Request[v1.ListFilesRequest]) (*connect_go.Response[v1.ListFilesResponse], error)
 	// CreateFile creates a new file.
 	CreateFile(context.Context) *connect_go.ClientStreamForClient[v1.CreateFileRequest, v1.CreateFileResponse]
+	// ImportFromURL imports a file from a URL. The file will be downloaded
+	// and stored under a certain path.
+	ImportFromURL(context.Context, *connect_go.Request[v1.ImportFromURLRequest]) (*connect_go.Response[v1.ImportFromURLResponse], error)
 	// DeleteFile deletes a file.
 	DeleteFile(context.Context, *connect_go.Request[v1.DeleteFileRequest]) (*connect_go.Response[v1.DeleteFileResponse], error)
 	// UpdateFile updates a file.
@@ -75,6 +78,11 @@ func NewFileServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts
 			baseURL+"/file.v1.FileService/CreateFile",
 			opts...,
 		),
+		importFromURL: connect_go.NewClient[v1.ImportFromURLRequest, v1.ImportFromURLResponse](
+			httpClient,
+			baseURL+"/file.v1.FileService/ImportFromURL",
+			opts...,
+		),
 		deleteFile: connect_go.NewClient[v1.DeleteFileRequest, v1.DeleteFileResponse](
 			httpClient,
 			baseURL+"/file.v1.FileService/DeleteFile",
@@ -110,15 +118,16 @@ func NewFileServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts
 
 // fileServiceClient implements FileServiceClient.
 type fileServiceClient struct {
-	getFile     *connect_go.Client[v1.GetFileRequest, v1.GetFileResponse]
-	listFiles   *connect_go.Client[v1.ListFilesRequest, v1.ListFilesResponse]
-	createFile  *connect_go.Client[v1.CreateFileRequest, v1.CreateFileResponse]
-	deleteFile  *connect_go.Client[v1.DeleteFileRequest, v1.DeleteFileResponse]
-	updateFile  *connect_go.Client[v1.UpdateFileRequest, v1.UpdateFileResponse]
-	shareFile   *connect_go.Client[v1.ShareFileRequest, v1.ShareFileResponse]
-	unshareFile *connect_go.Client[v1.UnshareFileRequest, v1.UnshareFileResponse]
-	attachSync  *connect_go.Client[v1.AttachSyncRequest, v1.AttachSyncResponse]
-	deleteSync  *connect_go.Client[v1.DeleteSyncRequest, v1.DeleteSyncResponse]
+	getFile       *connect_go.Client[v1.GetFileRequest, v1.GetFileResponse]
+	listFiles     *connect_go.Client[v1.ListFilesRequest, v1.ListFilesResponse]
+	createFile    *connect_go.Client[v1.CreateFileRequest, v1.CreateFileResponse]
+	importFromURL *connect_go.Client[v1.ImportFromURLRequest, v1.ImportFromURLResponse]
+	deleteFile    *connect_go.Client[v1.DeleteFileRequest, v1.DeleteFileResponse]
+	updateFile    *connect_go.Client[v1.UpdateFileRequest, v1.UpdateFileResponse]
+	shareFile     *connect_go.Client[v1.ShareFileRequest, v1.ShareFileResponse]
+	unshareFile   *connect_go.Client[v1.UnshareFileRequest, v1.UnshareFileResponse]
+	attachSync    *connect_go.Client[v1.AttachSyncRequest, v1.AttachSyncResponse]
+	deleteSync    *connect_go.Client[v1.DeleteSyncRequest, v1.DeleteSyncResponse]
 }
 
 // GetFile calls file.v1.FileService.GetFile.
@@ -134,6 +143,11 @@ func (c *fileServiceClient) ListFiles(ctx context.Context, req *connect_go.Reque
 // CreateFile calls file.v1.FileService.CreateFile.
 func (c *fileServiceClient) CreateFile(ctx context.Context) *connect_go.ClientStreamForClient[v1.CreateFileRequest, v1.CreateFileResponse] {
 	return c.createFile.CallClientStream(ctx)
+}
+
+// ImportFromURL calls file.v1.FileService.ImportFromURL.
+func (c *fileServiceClient) ImportFromURL(ctx context.Context, req *connect_go.Request[v1.ImportFromURLRequest]) (*connect_go.Response[v1.ImportFromURLResponse], error) {
+	return c.importFromURL.CallUnary(ctx, req)
 }
 
 // DeleteFile calls file.v1.FileService.DeleteFile.
@@ -174,6 +188,9 @@ type FileServiceHandler interface {
 	ListFiles(context.Context, *connect_go.Request[v1.ListFilesRequest]) (*connect_go.Response[v1.ListFilesResponse], error)
 	// CreateFile creates a new file.
 	CreateFile(context.Context, *connect_go.ClientStream[v1.CreateFileRequest]) (*connect_go.Response[v1.CreateFileResponse], error)
+	// ImportFromURL imports a file from a URL. The file will be downloaded
+	// and stored under a certain path.
+	ImportFromURL(context.Context, *connect_go.Request[v1.ImportFromURLRequest]) (*connect_go.Response[v1.ImportFromURLResponse], error)
 	// DeleteFile deletes a file.
 	DeleteFile(context.Context, *connect_go.Request[v1.DeleteFileRequest]) (*connect_go.Response[v1.DeleteFileResponse], error)
 	// UpdateFile updates a file.
@@ -211,6 +228,11 @@ func NewFileServiceHandler(svc FileServiceHandler, opts ...connect_go.HandlerOpt
 	mux.Handle("/file.v1.FileService/CreateFile", connect_go.NewClientStreamHandler(
 		"/file.v1.FileService/CreateFile",
 		svc.CreateFile,
+		opts...,
+	))
+	mux.Handle("/file.v1.FileService/ImportFromURL", connect_go.NewUnaryHandler(
+		"/file.v1.FileService/ImportFromURL",
+		svc.ImportFromURL,
 		opts...,
 	))
 	mux.Handle("/file.v1.FileService/DeleteFile", connect_go.NewUnaryHandler(
@@ -259,6 +281,10 @@ func (UnimplementedFileServiceHandler) ListFiles(context.Context, *connect_go.Re
 
 func (UnimplementedFileServiceHandler) CreateFile(context.Context, *connect_go.ClientStream[v1.CreateFileRequest]) (*connect_go.Response[v1.CreateFileResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("file.v1.FileService.CreateFile is not implemented"))
+}
+
+func (UnimplementedFileServiceHandler) ImportFromURL(context.Context, *connect_go.Request[v1.ImportFromURLRequest]) (*connect_go.Response[v1.ImportFromURLResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("file.v1.FileService.ImportFromURL is not implemented"))
 }
 
 func (UnimplementedFileServiceHandler) DeleteFile(context.Context, *connect_go.Request[v1.DeleteFileRequest]) (*connect_go.Response[v1.DeleteFileResponse], error) {
